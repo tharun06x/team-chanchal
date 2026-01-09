@@ -54,7 +54,11 @@ export default function ItemDetails() {
                 },
                 body: JSON.stringify({
                     senderId: currentUser.uid,
+                    senderName: currentUser.displayName,
+                    senderPhoto: currentUser.photoURL,
                     receiverId: item.sellerId,
+                    receiverName: item.sellerName,
+                    receiverPhoto: item.sellerPhoto,
                     listingId: item.id,
                     listingTitle: item.title
                 })

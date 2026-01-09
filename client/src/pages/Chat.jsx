@@ -101,6 +101,16 @@ export default function Chat() {
         }
     };
 
+    // Helper to find the "other" participant
+    const getOtherParticipant = (chat) => {
+        // Handle new schema (Array of Objects)
+        if (chat.participants && typeof chat.participants[0] === 'object') {
+            return chat.participants.find(p => p.uid !== currentUser.uid) || {};
+        }
+        // Fallback for old schema (Array of Strings) - can't get name/photo easily
+        return { displayName: 'User', photoURL: null };
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden h-[calc(100vh-8rem)] flex">
             {/* Sidebar List */}
@@ -110,19 +120,34 @@ export default function Chat() {
                     {conversations.length === 0 ? (
                         <div className="p-4 text-gray-500 text-center text-sm">No conversations yet</div>
                     ) : (
-                        conversations.map(chat => (
-                            <Link to={`/chat/${chat.id}`} key={chat.id} className={`block p-4 border-b hover:bg-gray-50 ${chat.id === conversationId ? 'bg-indigo-50 border-indigo-200' : ''}`}>
-                                <div className="flex justify-between mb-1">
-                                    <span className="font-medium text-gray-900 truncate w-2/3">{chat.listingTitle || 'Item'}</span>
-                                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                                        {chat.lastMessageTimestamp ? formatDistanceToNow(new Date(chat.lastMessageTimestamp)) : ''}
-                                    </span>
-                                </div>
-                                <p className={`text-sm truncate ${chat.lastMessageBy !== currentUser.uid ? 'font-bold text-gray-800' : 'text-gray-500'}`}>
-                                    {chat.lastMessageBy === currentUser.uid ? 'You: ' : ''}{chat.lastMessage}
-                                </p>
-                            </Link>
-                        ))
+                        conversations.map(chat => {
+                            const otherUser = getOtherParticipant(chat);
+                            return (
+                                <Link to={`/chat/${chat.id}`} key={chat.id} className={`block p-4 border-b hover:bg-gray-50 ${chat.id === conversationId ? 'bg-indigo-50 border-indigo-200' : ''}`}>
+                                    <div className="flex items-center mb-2">
+                                        {otherUser.photoURL ? (
+                                            <img src={otherUser.photoURL} className="h-10 w-10 rounded-full mr-3 object-cover" alt="" />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3 text-indigo-600 font-bold">
+                                                {otherUser.displayName ? otherUser.displayName[0] : 'U'}
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between">
+                                                <span className="font-bold text-gray-900 truncate">{otherUser.displayName || 'Unknown User'}</span>
+                                                <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                                                    {chat.lastMessageTimestamp ? formatDistanceToNow(new Date(chat.lastMessageTimestamp)) : ''}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">{chat.listingTitle}</p>
+                                        </div>
+                                    </div>
+                                    <p className={`text-sm truncate ${chat.lastMessageBy !== currentUser.uid ? 'font-bold text-gray-800' : 'text-gray-500'}`}>
+                                        {chat.lastMessageBy === currentUser.uid ? 'You: ' : ''}{chat.lastMessage}
+                                    </p>
+                                </Link>
+                            );
+                        })
                     )}
                 </div>
             </div>
@@ -131,19 +156,43 @@ export default function Chat() {
             <div className={`w-full md:w-2/3 flex flex-col ${!conversationId ? 'hidden md:flex' : 'flex'}`}>
                 {conversationId ? (
                     <>
-                        <div className="p-4 border-b flex items-center justify-between">
-                            <h2 className="font-bold text-gray-800">{activeChat?.listingTitle || 'Chat'}</h2>
+                        {/* Chat Header */}
+                        <div className="p-4 border-b flex items-center justify-between bg-white shadow-sm z-10">
+                            <div className="flex items-center">
+                                <Link to="/chat" className="md:hidden mr-3 text-gray-500">
+                                    <div className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100">←</div>
+                                </Link>
+
+                                {(() => {
+                                    const otherUser = getOtherParticipant(activeChat || conversations.find(c => c.id === conversationId) || {});
+                                    return (
+                                        <div className="flex items-center">
+                                            {otherUser.photoURL ? (
+                                                <img src={otherUser.photoURL} className="h-10 w-10 rounded-full mr-3 object-cover" alt="" />
+                                            ) : (
+                                                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3 text-indigo-600 font-bold">
+                                                    {otherUser.displayName ? otherUser.displayName[0] : 'U'}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <h2 className="font-bold text-gray-800">{otherUser.displayName || 'Chat'}</h2>
+                                                <p className="text-xs text-gray-500">{activeChat?.listingTitle || 'Item'}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+
                             <div className="flex items-center space-x-2">
                                 <a
                                     href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meetup for ${activeChat?.listingTitle || 'Item'}&details=Discussing purchase of ${activeChat?.listingTitle}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center hover:bg-green-200"
+                                    className="hidden sm:flex text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full items-center hover:bg-green-200"
                                 >
                                     <Calendar className="h-3 w-3 mr-1" />
-                                    Schedule Meetup
+                                    Schedule
                                 </a>
-                                <Link to="/chat" className="md:hidden text-sm text-indigo-600">Back</Link>
                             </div>
                         </div>
 

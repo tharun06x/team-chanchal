@@ -154,7 +154,11 @@ app.delete('/api/listings/:id', async (req, res) => {
 
 // Schemas
 const ConversationSchema = new mongoose.Schema({
-    participants: [String], // Array of UIDs
+    participants: [{
+        uid: String,
+        displayName: String,
+        photoURL: String
+    }],
     listingId: String,
     listingTitle: String,
     lastMessage: String,
@@ -175,11 +179,12 @@ const Message = mongoose.model('Message', MessageSchema);
 // 5. Start/Get Conversation
 app.post('/api/conversations', async (req, res) => {
     try {
-        const { senderId, receiverId, listingId, listingTitle } = req.body;
+        const { senderId, senderName, senderPhoto, receiverId, receiverName, receiverPhoto, listingId, listingTitle } = req.body;
 
         // Check if conversation already exists
+        // We look for a conversation where specific UIDs are present
         const existingOps = await Conversation.findOne({
-            participants: { $all: [senderId, receiverId] },
+            "participants.uid": { $all: [senderId, receiverId] },
             listingId: listingId
         });
 
@@ -188,7 +193,10 @@ app.post('/api/conversations', async (req, res) => {
         }
 
         const newConv = new Conversation({
-            participants: [senderId, receiverId],
+            participants: [
+                { uid: senderId, displayName: senderName, photoURL: senderPhoto },
+                { uid: receiverId, displayName: receiverName, photoURL: receiverPhoto }
+            ],
             listingId,
             listingTitle,
             lastMessage: '',
@@ -207,7 +215,7 @@ app.post('/api/conversations', async (req, res) => {
 app.get('/api/conversations/:userId', async (req, res) => {
     try {
         const convs = await Conversation.find({
-            participants: { $in: [req.params.userId] }
+            "participants.uid": req.params.userId
         }).sort({ lastMessageTimestamp: -1 });
         res.json(convs);
     } catch (error) {
