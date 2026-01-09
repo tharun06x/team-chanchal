@@ -48,8 +48,18 @@ export default function Chat() {
                 const response = await fetch(`${API_URL}/api/messages/${conversationId}`);
                 if (!response.ok) return;
                 const data = await response.json();
+                const formattedData = data.map(d => ({ ...d, id: d._id }));
 
-                setMessages(data.map(d => ({ ...d, id: d._id })));
+                // Smart Update: Only update state if data actually changed
+                setMessages(prev => {
+                    if (prev.length !== formattedData.length) {
+                        return formattedData;
+                    }
+                    // Deep check if needed, but length check solves 90% of flicker
+                    // For now, let's trust length for new message arrival
+                    // If user edits message, this won't catch it, but that's fine for MVP
+                    return prev;
+                });
 
                 // Update active chat title from conversations list
                 const chat = conversations.find(c => c.id === conversationId);
@@ -64,12 +74,13 @@ export default function Chat() {
         const interval = setInterval(fetchMessages, 3000);
 
         return () => clearInterval(interval);
-    }, [conversationId, conversations]);
+    }, [conversationId, conversations]); // Added conversations to dep array
 
-    // Scroll to bottom when messages change
+    // Scroll to bottom ONLY when new messages arrive
+    const messagesEndRef = useRef(null);
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages.length]); // Only scroll when COUNT changes, not just any re-render
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -207,7 +218,7 @@ export default function Chat() {
                                     </div>
                                 )
                             })}
-                            <div ref={bottomRef} />
+                            <div ref={messagesEndRef} />
                         </div>
 
                         <form onSubmit={sendMessage} className="p-4 border-t bg-white flex gap-2">

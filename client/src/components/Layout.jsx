@@ -37,7 +37,15 @@ export default function Layout({ children }) {
                                 <PlusCircle className="h-4 w-4 mr-2" />
                                 Sell Item
                             </Link>
-                            <div className="relative pl-2 border-l border-gray-200">
+                            <div
+                                className="relative pl-2 border-l border-gray-200"
+                                onMouseEnter={() => {
+                                    if (window.menuTimeout) clearTimeout(window.menuTimeout);
+                                }}
+                                onMouseLeave={() => {
+                                    window.menuTimeout = setTimeout(() => setUserMenuOpen(false), 2000);
+                                }}
+                            >
                                 <button
                                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                                     className="flex items-center focus:outline-none ring-2 ring-transparent hover:ring-indigo-200 rounded-full transition-all"
@@ -50,7 +58,15 @@ export default function Layout({ children }) {
                                         {/* Invisible backdrop to close menu on outside click */}
                                         <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)}></div>
 
-                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-20 border border-gray-100 animation-fade-in-up">
+                                        <div
+                                            className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-20 border border-gray-100 animation-fade-in-up"
+                                            onMouseEnter={() => {
+                                                if (window.menuTimeout) clearTimeout(window.menuTimeout);
+                                            }}
+                                            onMouseLeave={() => {
+                                                window.menuTimeout = setTimeout(() => setUserMenuOpen(false), 2000);
+                                            }}
+                                        >
                                             <div className="px-4 py-2 border-b border-gray-50 mb-1">
                                                 <p className="text-xs text-gray-500 font-medium">Signed in as</p>
                                                 <p className="text-sm font-bold text-gray-900 truncate">{currentUser.displayName}</p>
