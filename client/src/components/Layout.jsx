@@ -7,6 +7,48 @@ export default function Layout({ children }) {
     const { currentUser, logout } = useAuth();
     const location = useLocation();
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [prevUnreadCount, setPrevUnreadCount] = useState(0);
+
+    // Poll for notifications
+    React.useEffect(() => {
+        if (!currentUser) return;
+
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        const fetchUnread = async () => {
+            try {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const response = await fetch(`${API_URL}/api/conversations/${currentUser.uid}`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                // Logic: Count conversations where last message was NOT by me
+                const unread = data.filter(c => c.lastMessageBy && c.lastMessageBy !== currentUser.uid).length;
+
+                setUnreadCount(unread);
+
+                // Trigger Popup if count increased
+                if (unread > prevUnreadCount && Notification.permission === 'granted') {
+                    new Notification("New Message", {
+                        body: "You have a new reply in CampusMarket",
+                        icon: "/vite.svg"
+                    });
+                }
+                setPrevUnreadCount(unread);
+
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        fetchUnread();
+        const interval = setInterval(fetchUnread, 10000); // Poll every 10s
+        return () => clearInterval(interval);
+    }, [currentUser, prevUnreadCount]);
 
     if (!currentUser) {
         return <Navigate to="/login" state={{ from: location }} replace />;
@@ -32,6 +74,9 @@ export default function Layout({ children }) {
                             <Link to="/" className="text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-md font-medium transition-colors">Browse</Link>
                             <Link to="/chat" className="text-gray-600 hover:text-indigo-600 p-2 rounded-full relative transition-colors">
                                 <MessageCircle className="h-6 w-6" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-red-500 transform translate-x-1/2 -translate-y-1/3"></span>
+                                )}
                             </Link>
                             <Link to="/create-listing" className="bg-gray-900 text-white px-5 py-2.5 rounded-full font-medium hover:bg-black hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center">
                                 <PlusCircle className="h-4 w-4 mr-2" />
@@ -100,8 +145,11 @@ export default function Layout({ children }) {
                             <PlusCircle className="h-6 w-6 text-white" />
                         </div>
                     </Link>
-                    <Link to="/chat" className={`flex flex-col items-center justify-center w-full h-full rounded-xl transition-all ${location.pathname.startsWith('/chat') ? 'text-indigo-600 bg-indigo-50' : 'text-gray-400'}`}>
+                    <Link to="/chat" className={`flex flex-col items-center justify-center w-full h-full rounded-xl transition-all relative ${location.pathname.startsWith('/chat') ? 'text-indigo-600 bg-indigo-50' : 'text-gray-400'}`}>
                         <MessageCircle className="h-6 w-6" />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-2 right-6 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-red-500"></span>
+                        )}
                     </Link>
                 </div>
             </nav>
