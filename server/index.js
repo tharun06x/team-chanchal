@@ -201,6 +201,7 @@ app.post('/api/messages', async (req, res) => {
 });
 
 // 8. Get Messages for a Conversation
+// 8. Get Messages for a Conversation
 app.get('/api/messages/:conversationId', async (req, res) => {
     try {
         const messages = await Message.find({
@@ -208,6 +209,46 @@ app.get('/api/messages/:conversationId', async (req, res) => {
         }).sort({ timestamp: 1 });
         res.json(messages);
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// --- USER SYSTEM ---
+
+const UserSchema = new mongoose.Schema({
+    uid: { type: String, required: true, unique: true },
+    email: String,
+    displayName: String,
+    photoURL: String,
+    collegeDomain: String,
+    createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// 9. Sync User to MongoDB
+app.post('/api/users', async (req, res) => {
+    try {
+        const { uid, email, displayName, photoURL, collegeDomain } = req.body;
+        
+        // Upsert: Update if exists, Insert if not
+        const user = await User.findOneAndUpdate(
+            { uid },
+            { 
+                uid, 
+                email, 
+                displayName, 
+                photoURL, 
+                collegeDomain,
+                // Only set createdAt on insert (if not exists)
+                $setOnInsert: { createdAt: new Date() }
+            },
+            { new: true, upsert: true }
+        );
+        
+        res.json(user);
+    } catch (error) {
+        console.error("Error syncing user:", error);
         res.status(500).json({ message: error.message });
     }
 });

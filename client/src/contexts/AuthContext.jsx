@@ -25,19 +25,25 @@ export function AuthProvider({ children }) {
                 throw new Error('Only @vjcet.org emails are allowed.');
             }
 
-            // Check if user exists in Firestore, if not create
-            const userRef = doc(db, 'users', user.uid);
-            const userSnap = await getDoc(userRef);
+            // Sync with MongoDB backend (Create/Update user)
+            try {
+                // Use config URL if available, else localhost
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL,
-                    createdAt: serverTimestamp(),
-                    collegeDomain: 'vjcet.org'
+                await fetch(`${API_URL}/api/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        displayName: user.displayName,
+                        email: user.email,
+                        photoURL: user.photoURL,
+                        collegeDomain: 'vjcet.org'
+                    })
                 });
+            } catch (err) {
+                console.error("Failed to sync user to backend:", err);
+                // We don't block login if sync fails, but might be good to warn
             }
 
             return user;
