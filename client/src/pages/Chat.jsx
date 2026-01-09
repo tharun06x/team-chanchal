@@ -13,13 +13,16 @@ export default function Chat() {
     const [activeChat, setActiveChat] = useState(null);
     const bottomRef = useRef(null);
 
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
     // 1. Fetch Conversations List
+
     useEffect(() => {
         if (!currentUser) return;
 
         async function fetchConversations() {
             try {
-                const response = await fetch(`http://localhost:5000/api/conversations/${currentUser.uid}`);
+                const response = await fetch(`${API_URL}/api/conversations/${currentUser.uid}`);
                 if (!response.ok) return;
                 const data = await response.json();
 
@@ -42,7 +45,7 @@ export default function Chat() {
 
         async function fetchMessages() {
             try {
-                const response = await fetch(`http://localhost:5000/api/messages/${conversationId}`);
+                const response = await fetch(`${API_URL}/api/messages/${conversationId}`);
                 if (!response.ok) return;
                 const data = await response.json();
 
@@ -76,7 +79,7 @@ export default function Chat() {
         setNewMessage(''); // Optimistic clear
 
         try {
-            const response = await fetch('http://localhost:5000/api/messages', {
+            const response = await fetch(`${API_URL}/api/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -88,7 +91,7 @@ export default function Chat() {
 
             if (response.ok) {
                 // Fetch immediately to show new message
-                const msgsResponse = await fetch(`http://localhost:5000/api/messages/${conversationId}`);
+                const msgsResponse = await fetch(`${API_URL}/api/messages/${conversationId}`);
                 const data = await msgsResponse.json();
                 setMessages(data.map(d => ({ ...d, id: d._id })));
             }

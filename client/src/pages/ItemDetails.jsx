@@ -12,10 +12,12 @@ export default function ItemDetails() {
     const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
     useEffect(() => {
         async function fetchItem() {
             try {
-                const response = await fetch(`http://localhost:5000/api/listings/${id}`);
+                const response = await fetch(`${API_URL}/api/listings/${id}`);
                 if (!response.ok) throw new Error('Item not found');
                 const data = await response.json();
                 // Ensure id field exists
@@ -32,7 +34,7 @@ export default function ItemDetails() {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this listing?')) {
             try {
-                await fetch(`http://localhost:5000/api/listings/${id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/api/listings/${id}`, { method: 'DELETE' });
                 navigate('/');
             } catch (error) {
                 console.error("Failed to delete", error);
@@ -45,7 +47,7 @@ export default function ItemDetails() {
         if (!currentUser) return;
 
         try {
-            const response = await fetch('http://localhost:5000/api/conversations', {
+            const response = await fetch(`${API_URL}/api/conversations`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

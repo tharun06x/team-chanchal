@@ -54,7 +54,9 @@ export default function CreateListing() {
                 data.append('images', file);
             });
 
-            const response = await fetch('http://localhost:5000/api/listings', {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+            const response = await fetch(`${API_URL}/api/listings`, {
                 method: 'POST',
                 body: data // No Content-Type header needed for FormData
             });

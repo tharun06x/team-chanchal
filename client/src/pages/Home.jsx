@@ -20,7 +20,8 @@ export default function Home() {
         setLoading(true);
         try {
             // Fetch from Backend API
-            let url = 'http://localhost:5000/api/listings?';
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            let url = `${API_URL}/api/listings?`;
             if (category) url += `&category=${category}`;
             if (sort) url += `&sort=${sort}`;
 
