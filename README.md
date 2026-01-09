@@ -20,7 +20,7 @@ Built with the **MERN Stack** and powered by **Google Cloud Platform**, it featu
 ## 📸 Screenshots
 
 ### 🔐 Login Page
-![Login Page](img/Screenshot 2026-01-09 055537.png)
+![Login Page](/img/Screenshot 2026-01-09 055537.png)
 
 ### 🏠 Home / Listings Page
 ![Home Page](img/Screenshot 2026-01-09 055606.png)
