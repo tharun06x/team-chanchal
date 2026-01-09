@@ -67,7 +67,11 @@ export default function ItemDetails() {
             if (!response.ok) throw new Error('Failed to start chat');
 
             const conversation = await response.json();
-            navigate(`/chat/${conversation._id}`);
+            navigate(`/chat/${conversation._id}`, {
+                state: {
+                    prefilledText: `Hi, I'm interested in ${item.title}. Is it still available?`
+                }
+            });
         } catch (error) {
             console.error("Error starting chat:", error);
             alert("Failed to start chat");
@@ -119,7 +123,7 @@ export default function ItemDetails() {
                             <p className="mt-2 text-gray-600 leading-relaxed">{item.description}</p>
 
                             <a
-                                href="https://docs.google.com/forms"
+                                href="https://forms.gle/kqcrtQT9Deg8MJVx9"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="mt-4 inline-flex items-center text-xs text-gray-400 hover:text-red-500"

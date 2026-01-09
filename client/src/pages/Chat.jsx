@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Send, MessageCircle, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -7,11 +7,21 @@ import { formatDistanceToNow } from 'date-fns';
 export default function Chat() {
     const { conversationId } = useParams();
     const { currentUser } = useAuth();
+    const location = useLocation();
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [activeChat, setActiveChat] = useState(null);
     const bottomRef = useRef(null);
+
+    // Initial load of prefilled text
+    useEffect(() => {
+        if (location.state?.prefilledText) {
+            setNewMessage(location.state.prefilledText);
+            // Optional: Clear state so it doesn't persist on refresh/back? 
+            // Actually nice to keep it.
+        }
+    }, [location.state]);
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
