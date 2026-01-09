@@ -119,7 +119,7 @@ export default function ItemDetails() {
                             <p className="mt-2 text-gray-600 leading-relaxed">{item.description}</p>
 
                             <a
-                                href="https://docs.google.com/forms/u/0/"
+                                href="https://docs.google.com/forms"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="mt-4 inline-flex items-center text-xs text-gray-400 hover:text-red-500"
