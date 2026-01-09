@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 // const path = require('path'); // Not needed for path.join if we don't use local fs
@@ -230,22 +231,22 @@ const User = mongoose.model('User', UserSchema);
 app.post('/api/users', async (req, res) => {
     try {
         const { uid, email, displayName, photoURL, collegeDomain } = req.body;
-        
+
         // Upsert: Update if exists, Insert if not
         const user = await User.findOneAndUpdate(
             { uid },
-            { 
-                uid, 
-                email, 
-                displayName, 
-                photoURL, 
+            {
+                uid,
+                email,
+                displayName,
+                photoURL,
                 collegeDomain,
                 // Only set createdAt on insert (if not exists)
                 $setOnInsert: { createdAt: new Date() }
             },
             { new: true, upsert: true }
         );
-        
+
         res.json(user);
     } catch (error) {
         console.error("Error syncing user:", error);
