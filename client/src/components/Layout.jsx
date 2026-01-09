@@ -6,6 +6,7 @@ import { MessageCircle, PlusCircle, Search, LogOut, Home, User } from 'lucide-re
 export default function Layout({ children }) {
     const { currentUser, logout } = useAuth();
     const location = useLocation();
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     if (!currentUser) {
         return <Navigate to="/login" state={{ from: location }} replace />;
@@ -36,20 +37,31 @@ export default function Layout({ children }) {
                                 <PlusCircle className="h-4 w-4 mr-2" />
                                 Sell Item
                             </Link>
-                            <div className="relative group pl-2 border-l border-gray-200">
-                                <button className="flex items-center focus:outline-none ring-2 ring-transparent group-hover:ring-indigo-200 rounded-full transition-all">
+                            <div className="relative pl-2 border-l border-gray-200">
+                                <button
+                                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                    className="flex items-center focus:outline-none ring-2 ring-transparent hover:ring-indigo-200 rounded-full transition-all"
+                                >
                                     <img className="h-9 w-9 rounded-full object-cover border-2 border-white shadow-sm" src={currentUser.photoURL} alt="" />
                                 </button>
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 hidden group-hover:block transition-all border border-gray-100 animation-fade-in-up">
-                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                                        <p className="text-xs text-gray-500 font-medium">Signed in as</p>
-                                        <p className="text-sm font-bold text-gray-900 truncate">{currentUser.displayName}</p>
-                                    </div>
-                                    <button onClick={logout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                        <LogOut className="inline h-4 w-4 mr-2" />
-                                        Sign out
-                                    </button>
-                                </div>
+
+                                {userMenuOpen && (
+                                    <>
+                                        {/* Invisible backdrop to close menu on outside click */}
+                                        <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)}></div>
+
+                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 z-20 border border-gray-100 animation-fade-in-up">
+                                            <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                                                <p className="text-xs text-gray-500 font-medium">Signed in as</p>
+                                                <p className="text-sm font-bold text-gray-900 truncate">{currentUser.displayName}</p>
+                                            </div>
+                                            <button onClick={logout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                                <LogOut className="inline h-4 w-4 mr-2" />
+                                                Sign out
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
