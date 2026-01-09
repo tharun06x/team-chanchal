@@ -8,7 +8,47 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 // const path = require('path'); // Not needed for path.join if we don't use local fs
 // const fs = require('fs');
 
-// ... (keep earlier code)
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// MongoDB Connection
+let MONGO_URI = process.env.MONGO_URI;
+
+// Check if user forgot to update the placeholder
+if (!MONGO_URI || MONGO_URI.includes('your_mongodb_atlas_connection_string_here')) {
+    console.warn('⚠️  WARNING: MongoDB URI is not set in .env file!');
+    console.warn('⚠️  Falling back to local MongoDB (mongodb://127.0.0.1:27017/college-marketplace)');
+    MONGO_URI = 'mongodb://127.0.0.1:27017/college-marketplace';
+}
+
+mongoose.connect(MONGO_URI)
+    .then(() => console.log('✅ MongoDB Connected'))
+    .catch(err => {
+        console.error('❌ MongoDB Connection Error:', err.message);
+        console.error('   (Ensure MongoDB is running locally or update .env with your Atlas connection string)');
+    });
+
+// Schemas
+const ListingSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    price: Number,
+    category: String,
+    condition: String,
+    images: [String],
+    sellerId: String,
+    sellerName: String,
+    sellerPhoto: String,
+    collegeDomain: String,
+    status: { type: String, default: 'active' },
+    createdAt: { type: Date, default: Date.now },
+});
+
+const Listing = mongoose.model('Listing', ListingSchema);
 
 // Cloudinary Config
 cloudinary.config({
