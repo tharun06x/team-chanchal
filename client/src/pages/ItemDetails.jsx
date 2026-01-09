@@ -87,9 +87,9 @@ export default function ItemDetails() {
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="md:flex">
                 {/* Images */}
-                <div className="md:w-1/2 bg-gray-200">
+                <div className="md:w-1/2 bg-gray-100 flex items-center justify-center relative">
                     {item.images?.length > 0 ? (
-                        <img src={item.images[0]} alt={item.title} className="w-full h-96 object-cover" />
+                        <img src={item.images[0]} alt={item.title} className="w-full h-96 object-contain" />
                     ) : (
                         <div className="w-full h-96 flex items-center justify-center text-gray-500">No Image</div>
                     )}
