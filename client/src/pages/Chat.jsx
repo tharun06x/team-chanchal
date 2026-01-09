@@ -76,11 +76,34 @@ export default function Chat() {
         return () => clearInterval(interval);
     }, [conversationId, conversations]); // Added conversations to dep array
 
-    // Scroll to bottom ONLY when new messages arrive
+    // 3. Smart Scroll Logic
     const messagesEndRef = useRef(null);
+    const scrollContainerRef = useRef(null);
+
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages.length]); // Only scroll when COUNT changes, not just any re-render
+        if (!messagesEndRef.current || messages.length === 0) return;
+
+        const isLastMessageByMe = messages[messages.length - 1].senderId === currentUser.uid;
+
+        // Always scroll if I sent the message
+        if (isLastMessageByMe) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+
+        // Otherwise, check if user is near the bottom
+        // This relies on the container ref which we need to attach
+        const container = scrollContainerRef.current;
+        if (container) {
+            const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+            if (isNearBottom) {
+                messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else {
+            // Fallback for first load if ref isn't attached yet
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages.length, currentUser.uid]);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -207,7 +230,7 @@ export default function Chat() {
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
                             {messages.map(msg => {
                                 const isMe = msg.senderId === currentUser.uid;
                                 return (

@@ -181,15 +181,23 @@ app.post('/api/conversations', async (req, res) => {
     try {
         const { senderId, senderName, senderPhoto, receiverId, receiverName, receiverPhoto, listingId, listingTitle } = req.body;
 
-        // Check if conversation already exists
-        // We look for a conversation where specific UIDs are present
-        const existingOps = await Conversation.findOne({
-            "participants.uid": { $all: [senderId, receiverId] },
-            listingId: listingId
+        // Check if conversation already exists between these distinct users
+        // We prioritize finding ANY chat between them to avoid duplicates in the sidebar
+        // This implements "One Chat Thread Per User Pair" (WhatsApp Style)
+        let existing = await Conversation.findOne({
+            "participants.uid": { $all: [senderId, receiverId] }
         });
 
-        if (existingOps) {
-            return res.json(existingOps);
+        if (existing) {
+            // Determine if we should update the "Current Context" (Listing Title)
+            // Only update if the user is initiated a chat from a DIFFERENT listing
+            if (existing.listingId !== listingId) {
+                existing.listingId = listingId;
+                existing.listingTitle = listingTitle;
+                // Optional: Add a system message indicating context switch? For now, just silent update.
+                await existing.save();
+            }
+            return res.json(existing);
         }
 
         const newConv = new Conversation({
