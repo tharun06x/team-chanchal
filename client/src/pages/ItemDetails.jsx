@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase-config';
 import { doc, getDoc, deleteDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { MessageCircle, Trash2, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Trash2, ArrowLeft, Flag } from 'lucide-react';
 
 export default function ItemDetails() {
     const { id } = useParams();
@@ -113,6 +113,16 @@ export default function ItemDetails() {
                         <div className="mt-6">
                             <h3 className="text-sm font-medium text-gray-900">Description</h3>
                             <p className="mt-2 text-gray-600 leading-relaxed">{item.description}</p>
+
+                            <a
+                                href="https://docs.google.com/forms/u/0/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-flex items-center text-xs text-gray-400 hover:text-red-500"
+                            >
+                                <Flag className="h-3 w-3 mr-1" />
+                                Report this item
+                            </a>
                         </div>
 
                         <div className="mt-8 border-t pt-6">

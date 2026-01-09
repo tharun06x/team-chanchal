@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function Chat() {
@@ -133,7 +133,18 @@ export default function Chat() {
                     <>
                         <div className="p-4 border-b flex items-center justify-between">
                             <h2 className="font-bold text-gray-800">{activeChat?.listingTitle || 'Chat'}</h2>
-                            <Link to="/chat" className="md:hidden text-sm text-indigo-600">Back</Link>
+                            <div className="flex items-center space-x-2">
+                                <a
+                                    href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meetup for ${activeChat?.listingTitle || 'Item'}&details=Discussing purchase of ${activeChat?.listingTitle}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full flex items-center hover:bg-green-200"
+                                >
+                                    <Calendar className="h-3 w-3 mr-1" />
+                                    Schedule Meetup
+                                </a>
+                                <Link to="/chat" className="md:hidden text-sm text-indigo-600">Back</Link>
+                            </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
