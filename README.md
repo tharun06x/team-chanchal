@@ -4,8 +4,6 @@
 
 🚀 **Live Demo:** [https://team-chanchal.vercel.app/](https://team-chanchal.vercel.app/)
 
-![CampusMarket Banner](https://via.placeholder.com/1200x400?text=CampusMarket+Preview)
-
 ## 🌟 Overview
 **CampusMarket** reduces the friction of buying and selling items on campus. Unlike open platforms like OLX, this marketplace is **restricted strictly to our college domain (`@vjcet.org`)**, creating a verified and safe environment for students.
 
